@@ -1,0 +1,25 @@
+services:
+  web:
+    # 从当前目录的 Dockerfile 构建镜像
+    build: .
+
+    # 在端口 8000 上托管 FastAPI 应用
+    ports:
+      - "8000:8000"
+
+    develop:
+      # 创建 `watch` 配置以更新应用
+      # https://docs.docker.com/compose/file-watch/#compose-watch-versus-bind-mounts
+      watch:
+        # 将工作目录与容器中的 `/app` 目录同步
+        - action: sync
+          path: .
+          target: /app
+          # 排除项目虚拟环境 — 它可能是容器中不同平台的
+          ignore:
+            - .venv/
+
+        # 如果依赖发生变化，通过检查 uv.lock 重建镜像
+        - action: rebuild
+          path: ./uv.lock
+
